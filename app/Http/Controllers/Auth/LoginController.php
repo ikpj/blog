@@ -4,16 +4,25 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\{
+    Foundation\Application,
+    View\Factory,
+    View\View
+};
+use Illuminate\Http\{
+    RedirectResponse,
+    Request,
+    JsonResponse
+};
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\JsonResponse;
 
 class LoginController extends Controller
 {
     /**
      * Show self defined Login View.
      */
-    public function showLoginForm()
+    public function showLoginForm(): Factory|View|Application
     {
         return view('auth.login');
     }
@@ -22,9 +31,9 @@ class LoginController extends Controller
      * Handle an authentication attempt.
      *
      * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
-    public function login(Request $request)
+    public function login(Request $request): RedirectResponse
     {
         // TODO add throttle
 
@@ -46,11 +55,11 @@ class LoginController extends Controller
 
     /**
      * Log the user out of the application.
-     * 
+     *
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return Application|JsonResponse|RedirectResponse|Redirector
      */
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse|Redirector|Application|RedirectResponse
     {
         Auth::guard()->logout();
 
