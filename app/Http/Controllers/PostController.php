@@ -8,6 +8,7 @@ use Illuminate\Contracts\{
     View\Factory,
     View\View
 };
+use Illuminate\Support\Facades\Session;
 use Illuminate\Http\{
     RedirectResponse,
     Request,
@@ -24,7 +25,7 @@ class PostController extends Controller
      */
     public function index(): View|Factory|Application
     {
-        return view('post.index', ['posts' => Post::getPosts()]);
+        return view('post.index', ['data' => Post::getPosts()]);
     }
 
     /**
@@ -50,14 +51,17 @@ class PostController extends Controller
             'content' => ['required', 'string', 'max:65535'],
         ]);
 
-        $result = Post::add(
+        $id = Post::add(
             Auth::id(),
             $request->post('title'),
             $request->post('content')
         );
 
-        if ($result) {
-            return redirect()->route('post.show', ['id' => $result]);
+        if ($id) {
+            Session::flash('successes', [
+                'Post ID:' . $id . ' is posted'
+            ]);
+            return redirect()->route('post.my');
         } else {
             return back()->withInput()
                 ->withErrors(['Failed to create post']);
@@ -74,7 +78,7 @@ class PostController extends Controller
     public function show($id): View|Factory|Application
     {
         if ($posts = Post::getById($id)) {
-            return view('post.show', ['post' => $posts]);
+            return view('post.show', ['data' => $posts]);
         } else {
             abort(404);
         }
@@ -94,7 +98,7 @@ class PostController extends Controller
             abort(404);
         }
 
-        return view('post.edit', ['post' => $postModel]);
+        return view('post.edit', ['data' => $postModel]);
     }
 
 
@@ -113,9 +117,13 @@ class PostController extends Controller
         ]);
 
         if (Post::updateByIdAndUserId($id, Auth::id(), $request->input('title'), $request->input('content'))) {
-            return redirect()->route('post.show', ['id' => $id]);
+            Session::flash('successes', [
+                'Post ID:' . $id . ' is updated'
+            ]);
+            return redirect()->route('post.my');
         } else {
-            return redirect()->route('post.edit', ['id' => $id])
+            return back()
+                ->withInput()
                 ->withErrors(['Failed to update']);
         }
     }
@@ -129,11 +137,26 @@ class PostController extends Controller
     public function destroy($id): RedirectResponse
     {
         if (Post::deleteByIdAndUserId($id, Auth::id())) {
-            return redirect()->route('post.index');
+            Session::flash('successes', [
+                'Post ID:' . $id . ' is deleted'
+            ]);
+            return redirect()->route('post.my');
         } else {
             return back()
                 ->withErrors(['Failed to delete']);
         }
     }
 
+    /**
+     * @return Application|Factory|View
+     */
+    public function my(): View|Factory|Application
+    {
+        if (!Auth::check()) {
+            abort(403);
+        }
+
+        $userId = Auth::id();
+        return view('post.my', ['data' => Post::getMyPosts($userId)]);
+    }
 }

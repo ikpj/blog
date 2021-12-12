@@ -4,6 +4,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Contracts\{
     Foundation\Application,
     View\Factory,
@@ -38,8 +39,8 @@ class LoginController extends Controller
         // TODO add throttle
 
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+            User::EMAIL => ['required', 'email'],
+            User::PASSWORD => ['required'],
         ]);
 
         if (Auth::attempt($credentials)) {
@@ -48,7 +49,9 @@ class LoginController extends Controller
             return redirect()->intended('/');
         }
 
-        return back()->withErrors([
+        return back()
+            ->withInput()
+            ->withErrors([
             'email' => __('auth.failed'),
         ]);
     }

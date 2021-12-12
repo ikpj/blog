@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{
     Auth,
@@ -17,30 +21,30 @@ class RegisterController extends Controller
     /**
      * Show self defined Login View.
      *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     * @return Application|Factory|View
      */
-    public function showRegistrationForm()
+    public function showRegistrationForm(): View|Factory|Application
     {
         return view('auth.register');
     }
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
-    public function register(Request $request)
+    public function register(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'string', 'email', 'max:100', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            User::NAME => ['required', 'string', 'max:100'],
+            User::EMAIL => ['required', 'string', 'email', 'max:100', 'unique:users'],
+            User::PASSWORD => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         // create user
         $user = User::create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password')),
+            User::NAME => $request->input('name'),
+            User::EMAIL => $request->input('email'),
+            User::PASSWORD => Hash::make($request->input('password')),
         ]);
 
         if (isset($user)) {
@@ -49,9 +53,11 @@ class RegisterController extends Controller
 
             return redirect()->intended('/');
         } else {
-            return back()->withErrors([
-                'Registration failed',
-            ]);
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'Registration failed',
+                ]);
         }
     }
 }

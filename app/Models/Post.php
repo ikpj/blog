@@ -24,6 +24,7 @@ class Post extends Model
     public const USER_ID = 'user_id';
     public const TITLE = 'name';
     public const CONTENT = 'content';
+    public const DELETED_AT = 'deleted_at';
 
     //Format output on columns
     protected $casts = [
@@ -37,7 +38,13 @@ class Post extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        $relation = $this->belongsTo(User::class);
+
+        if (Auth::guard('admin')->check()) {
+            $relation = $relation->withTrashed();
+        }
+
+        return $relation;
     }
 
     /**
@@ -71,9 +78,17 @@ class Post extends Model
      */
     public static function getById($id): mixed
     {
-        return self::with('user')
+        $model = new self;
+
+        if (Auth::guard('admin')->check()) {
+            $model = $model->withTrashed();
+        }
+
+        return $model
+            ->with('user:' . User::ID . ',' . User::NAME)
             ->find($id);
     }
+
 
     /**
      * @param int $perPage
@@ -82,6 +97,7 @@ class Post extends Model
     public static function getPosts(int $perPage = 5): LengthAwarePaginator
     {
         return Post::with('user')
+            ->orderBy(self::ID, 'DESC')
             ->paginate($perPage);
     }
 
@@ -103,7 +119,21 @@ class Post extends Model
         ]);
     }
 
-
+    /**
+     * @param $id
+     * @param string $title
+     * @param string $content
+     * @return mixed
+     */
+    public static function updateById($id, string $title, string $content): mixed
+    {
+        return self::where([
+            self::ID => $id
+        ])->update([
+            self::TITLE => $title,
+            self::CONTENT => $content
+        ]);
+    }
 
     /**
      * @param $id
@@ -118,5 +148,81 @@ class Post extends Model
         ])->first();
 
         return $model ? $model->delete() : false;
+    }
+
+    /**
+     * @param int $perPage
+     * @return mixed
+     */
+    public static function getList(int $perPage = 10)
+    {
+        return self::with('user')
+            ->withTrashed()
+            ->orderBy(self::ID, 'DESC')
+            ->paginate($perPage);
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public static function deleteById($id): mixed
+    {
+        $model = self::where([
+            self::ID => $id
+        ])->first();
+
+        return $model ? $model->delete() : false;
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function total(): mixed
+    {
+        return self::count();
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function totalWithTrashed(): mixed
+    {
+        return self::withTrashed()->count();
+    }
+
+    /**
+     * @param $id
+     * @return bool|null
+     */
+    public static function restoreById($id): ?bool
+    {
+        $model = self::onlyTrashed()
+            ->find($id);
+
+        return $model ? $model->restore() : false;
+    }
+
+    /**
+     * @param $userId
+     * @return bool|null
+     */
+    public static function deleteByUserId($userId): ?bool
+    {
+        $model = self::where(self::USER_ID, $userId);
+
+        return $model ? $model->delete() : false;
+    }
+
+    /**
+     * @param int $userId
+     * @param int $perPage
+     * @return mixed
+     */
+    public static function getMyPosts(int $userId, int $perPage = 1)
+    {
+        return self::where(self::USER_ID, $userId)
+            ->orderBy(self::ID, 'DESC')
+            ->paginate($perPage);
     }
 }

@@ -11246,3 +11246,8 @@ header.masthead .site-heading .h1 {
     font-size: 2.25rem;
   }
 }
+@media (max-width: 991px) {
+    .navbar-collapse li button {
+        color: rgba(0, 0, 0, 0.55) !important;
+    }
+}

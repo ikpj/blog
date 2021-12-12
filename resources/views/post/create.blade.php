@@ -21,11 +21,11 @@
 
                     <div class="form-group mb-4">
                         <label for="title">Title</label>
-                        <input name="title" type="text" class="form-control" placeholder="Title" required>
+                        <input name="title" type="text" class="form-control" placeholder="Title" required value="{{ old(\App\Models\Post::TITLE) }}">
                     </div>
                     <div class="form-group mb-4">
                         <label for="content">Content</label>
-                        <textarea name="content" class="form-control" placeholder="Enter content here..." rows="10" required></textarea>
+                        <textarea name="content" class="form-control" placeholder="Enter content here..." rows="10" required><{{ old(\App\Models\Post::CONTENT) }}/textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>

@@ -16,19 +16,19 @@
                 @component('components.validationErrors')
                 @endcomponent
 
-                <form action="{{ route('post.update', ['id' => $post->{\App\Models\Post::ID}]) }}" method="post">
+                <form action="{{ route('post.update', ['id' => $data->{\App\Models\Post::ID}]) }}" method="post">
                     @csrf
                     @method('PUT')
 
                     <div class="form-group mb-4">
                         <label for="title">Title</label>
                         <input name="title" type="text" class="form-control" placeholder="Title" required
-                               value="{{ old('title', $post->{\App\Models\Post::TITLE}) }}">
+                               value="{{ old(\App\Models\Post::TITLE, $data->{\App\Models\Post::TITLE}) }}">
                     </div>
                     <div class="form-group mb-4">
                         <label for="content">Content</label>
                         <textarea name="content" class="form-control" placeholder="Enter content here..." rows="10"
-                                  required>{{ old('content', $post->{\App\Models\Post::CONTENT}) }}</textarea>
+                                  required>{{ old(\App\Models\Post::CONTENT, $data->{\App\Models\Post::CONTENT}) }}</textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
