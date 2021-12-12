@@ -2,15 +2,15 @@
 
 ## Contents
 
-- [Features](#Features)
+- [Features](#features)
 - [Environment](#environment)
 - [Installation](#installation)
-- [Database seeding](#database seeding)
+- [Database seeding](#database-seeding)
 - [URL](#url)
 - [Credentials](#credentials)
 - [Testing](#testing)
 - [Deploy](#deploy)
-- [Additional information](#Additional information)
+- [Additional information](#additional-information)
 
 ## Features
 
